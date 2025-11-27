@@ -110,8 +110,7 @@ async function buscar() {
       const response = await fetch(archivo);
       const data = await response.json();
 
-      encontrado = data.find(item => item["DNI"] == dni);
-
+      encontrado = data.find(item => item["DNI"] === dni);
       if (encontrado) break;
     } catch (err) {
       console.error(`Error leyendo archivo: ${archivo}`, err);
@@ -140,4 +139,3 @@ async function buscar() {
 
 </body>
 </html>
-
