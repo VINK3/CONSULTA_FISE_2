@@ -110,7 +110,8 @@ async function buscar() {
       const response = await fetch(archivo);
       const data = await response.json();
 
-      encontrado = data.find(item => item.dni === dni);
+      encontrado = data.find(item => item["DNI"] == dni);
+
       if (encontrado) break;
     } catch (err) {
       console.error(`Error leyendo archivo: ${archivo}`, err);
@@ -124,11 +125,11 @@ async function buscar() {
   } else {
     cuerpo.innerHTML = `
       <tr>
-        <td>${encontrado.dni}</td>
-        <td>${encontrado.nombre}</td>
-        <td>${encontrado.tipo}</td>
-        <td>${encontrado.estado}</td>
-        <td>${encontrado.observaciones}</td>
+        <td>${encontrado["DNI"]}</td>
+        <td>${encontrado["NOMBRE DEL USUARIO"]}</td>
+        <td>${encontrado["TIPO DE BENEFICIARIO"]}</td>
+        <td>${encontrado["ESTADO FISE"]}</td>
+        <td>${encontrado["OBSERVACIONES"]}</td>
       </tr>
     `;
   }
@@ -139,3 +140,4 @@ async function buscar() {
 
 </body>
 </html>
+
