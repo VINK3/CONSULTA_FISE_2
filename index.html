@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Consulta Estado FISE</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: url('electrocentro.png') no-repeat center center fixed;
+      background-size: contain;
+      background-color: #003366;
+      margin: 0;
+      padding: 0;
+      color: white;
+      text-align: center;
+    }
+    .container {
+      background-color: rgba(0, 0, 0, 0.6);
+      margin: 5% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 600px;
+    }
+    input, button {
+      width: 80%;
+      padding: 10px;
+      font-size: 1em;
+      margin-top: 10px;
+    }
+    button {
+      cursor: pointer;
+    }
+    table {
+      margin-top: 20px;
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #fff;
+    }
+    th {
+      background-color: #004080;
+    }
+    #loading {
+      display: none;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Consulta Estado FISE</h1>
+
+    <input type="text" id="dniInput" placeholder="Ingrese su DNI">
+    <br>
+    <button onclick="buscar()">Consultar</button>
+
+    <div id="loading">Buscando...</div>
+
+    <table id="resultado" style="display:none;">
+      <thead>
+        <tr>
+          <th>DNI</th>
+          <th>NOMBRE DEL USUARIO</th>
+          <th>TIPO DE BENEFICIARIO</th>
+          <th>ESTADO FISE</th>
+          <th>OBSERVACIÓN</th>
+        </tr>
+      </thead>
+      <tbody id="resultBody"></tbody>
+    </table>
+  </div>
+
+<script>
+async function cargarArchivosJSON() {
+  try {
+    const index = await fetch("index.json");
+    return await index.json();
+  } catch (e) {
+    console.error("No se pudo cargar index.json", e);
+    return [];
+  }
+}
+
+async function buscar() {
+  const dni = document.getElementById("dniInput").value.trim();
+  const resultado = document.getElementById("resultado");
+  const cuerpo = document.getElementById("resultBody");
+  const loading = document.getElementById("loading");
+
+  resultado.style.display = "none";
+  cuerpo.innerHTML = "";
+  loading.style.display = "block";
+
+  if (!dni || dni.length < 8) {
+    loading.style.display = "none";
+    cuerpo.innerHTML = `<tr><td colspan="5">⚠️ Ingrese un DNI válido</td></tr>`;
+    resultado.style.display = "table";
+    return;
+  }
+
+  const archivos = await cargarArchivosJSON();
+  let encontrado = null;
+
+  for (const archivo of archivos) {
+    try {
+      const response = await fetch(archivo);
+      const data = await response.json();
+
+      encontrado = data.find(item => item.dni === dni);
+      if (encontrado) break;
+    } catch (err) {
+      console.error(`Error leyendo archivo: ${archivo}`, err);
+    }
+  }
+
+  loading.style.display = "none";
+
+  if (!encontrado) {
+    cuerpo.innerHTML = `<tr><td colspan="5">❌ No se encontró información para el DNI ingresado</td></tr>`;
+  } else {
+    cuerpo.innerHTML = `
+      <tr>
+        <td>${encontrado.dni}</td>
+        <td>${encontrado.nombre}</td>
+        <td>${encontrado.tipo}</td>
+        <td>${encontrado.estado}</td>
+        <td>${encontrado.observacion}</td>
+      </tr>
+    `;
+  }
+
+  resultado.style.display = "table";
+}
+</script>
+
+</body>
+</html>
